@@ -3,65 +3,84 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+// Install the package, then include this namespace for Gyro
+// For WebGL on iOS, go to Project Settings > Input System Package
+// Enable Motion Usage
+// Make sure to create a settings asset when prompted.
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private int score = 0;
-    public Text scoreText;
-    public int health = 5;
-    public Text healthText;
-    private int originalHealth;
-    private int originalScore;
-    public float speed = 10.0f; //(acceleration)
-    public float maxSpeed = 20.0f;
-    public float deceleration = 35.0f;
-    private Vector3 velocity = Vector3.zero;
-    public Text winLoseText;
-    public Image winLoseBG;
+    public float speed;
+	public float friction;
+	public Text scoreText;
+	public Text healthText;
+	public GameObject endGameContainer;
+	private int score = 0;
+	private int health = 5;
+	private Rigidbody rb;
+	// This function pointer will allow us to conditionally determine how to move,
+	// Based on input devices available on the current playform. Bitchin'.
+	public delegate void InputFuncPtr();
+	InputFuncPtr movefunction = null;
 
-    private void Start()
-    {
-        originalHealth = health;
-        originalScore = score;
-    }
+	void Start()
+	{
+		// https://docs.unity3d.com/ScriptReference/RuntimePlatform.html
+		// Checks for accelerometer support, or an editor being used. Remove the other two options to get your input back.
+		if (SystemInfo.supportsAccelerometer == true)
+		{
+			// Any sensors used must be manually enabled
+			InputSystem.EnableDevice(Accelerometer.current);
+			movefunction = new InputFuncPtr(moveMobile);
+		}
+		else
+			movefunction = new InputFuncPtr(moveKbd);
+		rb = GetComponent<Rigidbody>();
+	}
 
-    private void Update()
-    {
-        if (health <= 0) //player loss check, shows loss screen, resets player and scene
-        {
-            winLoseText.text = "Game Over!";
-            winLoseText.color = Color.white;
-            winLoseBG.color = Color.red;
-            winLoseBG.gameObject.SetActive(true); // enable WinLoseBG element
-            StartCoroutine(LoadScene(3.0f)); //delay
-            health = originalHealth;
-            score = originalScore;
-        }
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        Vector3 direction = new Vector3(horizontal, 0, vertical);
-        
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-        SceneManager.LoadScene("Menu");
-        }
-        //movement
-        if (direction.magnitude > 0)
-        {
-            velocity += direction * speed * Time.deltaTime;
-            velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
-        }
-        else
-        {
-            velocity -= velocity.normalized * deceleration * Time.deltaTime;
-            if (velocity.magnitude < 0.2f)
-            {
-                velocity = Vector3.zero;
-            }
-        }
+	// Update is called once per frame
+	void FixedUpdate()
+	{
+		movefunction();
+	}
 
-        transform.position += velocity * Time.deltaTime;
-    }
+	void moveKbd()
+	{
+		Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+		if (direction != Vector3.zero)
+			rb.AddForce(direction * speed);
+		else
+			rb.velocity *= Mathf.Clamp01(1f - friction * Time.fixedDeltaTime);
+	}
+
+	void moveMobile()
+	{
+		Vector3 tilt, force;
+		float currentTiltMagnitude, currentSpeed, tiltAcceleration, previousTiltMagnitude = 0, speedModFactor = 2.5f;
+		// Read and adjust the device angle
+		tilt = Accelerometer.current.acceleration.ReadValue();
+		tilt = Quaternion.Euler(90, 0, 0) * tilt; // Rotate the tilt vector to match the game's orientation
+		// tilt.Normalize();
+
+
+		// Track movement between frames
+		currentTiltMagnitude = tilt.magnitude;
+		tiltAcceleration = (currentTiltMagnitude - previousTiltMagnitude) / Time.deltaTime;
+		previousTiltMagnitude = currentTiltMagnitude;
+
+		// Apply the tilt vector as a force in the X and Z directions, while keeping the player grounded in the Y direction
+		force = new Vector3(tilt.x, 0, tilt.y - 0.707f);
+
+		if (force.magnitude > 0.08)
+		{
+			currentSpeed = speed + tiltAcceleration * speedModFactor;
+			rb.AddForce(force * currentSpeed);
+			rb.velocity = Vector3.ClampMagnitude(rb.velocity, 10f);
+		}
+		else
+			rb.velocity *= Mathf.Clamp01(1f - friction * Time.fixedDeltaTime);
+	}
 
     private void OnTriggerEnter(Collider other)
     {
@@ -81,6 +100,16 @@ public class PlayerController : MonoBehaviour
         else if (other.CompareTag("Goal"))
         {
             Debug.Log("You win!");
+        }
+        else if (other.CompareTag("Walls"))
+        {
+            Debug.Log("Wall hit");
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Walls"))
+        {
         }
     }
 
