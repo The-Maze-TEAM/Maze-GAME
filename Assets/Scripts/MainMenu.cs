@@ -9,7 +9,7 @@ public class MainMenu : MonoBehaviour
 	public Material trapMat;
 	public Material goalMat;
 	public Toggle colorblindMode;
-	public void PlayMaze()
+	public void PlayMaze() //loads some basic settings, then loads gamemode menu
 	{
 		if (colorblindMode != null && colorblindMode.isOn)
     	{
@@ -21,7 +21,7 @@ public class MainMenu : MonoBehaviour
 			trapMat.color = Color.red;
 			goalMat.color = Color.green;
 		}
-		SceneManager.LoadScene("maze");
+		//SceneManager.LoadScene("maze");
 
 	}
 
