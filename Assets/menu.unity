@@ -2468,7 +2468,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colorblindMode: {fileID: 1969362082}
-  trapMat: {fileID: 2100000, guid: 6e5e7cef7df66f0f8a9bfeed0882ab9b, type: 2}
+  trapMat: {fileID: 2100000, guid: 10a141a56492f0a4490f6cb337d73ece, type: 2}
   goalMat: {fileID: 2100000, guid: de4b0d62410eff0a58529db570aa579c, type: 2}
 --- !u!224 &769177711457725120
 RectTransform:
