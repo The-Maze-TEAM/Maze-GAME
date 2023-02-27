@@ -2,13 +2,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Unity.Netcode;
 // Install the package, then include this namespace for Gyro
 // For WebGL on iOS, go to Project Settings > Input System Package
 // Enable Motion Usage
 // Make sure to create a settings asset when prompted.
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
 	public float speed;
 	public float friction;
@@ -41,8 +42,9 @@ public class PlayerController : MonoBehaviour
 	// Update is called once per frame
 	void FixedUpdate()
 	{
-	    if (Input.GetButtonDown("Cancel"))
-		    StartCoroutine(LoadSceneWait(0.0f, "menu"));
+		if (!IsOwner) return;
+		if (Input.GetButtonDown("Cancel"))
+			StartCoroutine(LoadSceneWait(0.0f, "menu"));
 		movefunction();
 	}
 
@@ -50,7 +52,10 @@ public class PlayerController : MonoBehaviour
 	{
 		Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 		if (direction != Vector3.zero)
+		{
+			Debug.Log("I am Moving");
 			rb.AddForce(direction * speed);
+		}
 		else
 			rb.velocity *= Mathf.Clamp01(1f - friction * Time.fixedDeltaTime);
 	}
