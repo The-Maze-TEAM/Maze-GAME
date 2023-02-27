@@ -6623,6 +6623,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1266995574}
+  - component: {fileID: 1266995575}
   m_Layer: 5
   m_Name: NetManUi
   m_TagString: Untagged
@@ -6653,6 +6654,21 @@ RectTransform:
   m_AnchoredPosition: {x: -0.000015259, y: 0.00090027}
   m_SizeDelta: {x: 800, y: 682.24}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1266995575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1266995573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d338fa7ac0953250c9058de7f37e7da6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverBtn: {fileID: 1688890247}
+  hostBtn: {fileID: 1937002993}
+  clientBtn: {fileID: 1685115493}
 --- !u!1 &1271644593
 GameObject:
   m_ObjectHideFlags: 0
