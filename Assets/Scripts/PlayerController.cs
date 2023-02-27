@@ -52,10 +52,7 @@ public class PlayerController : NetworkBehaviour
 	{
 		Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
 		if (direction != Vector3.zero)
-		{
-			Debug.Log("I am Moving");
 			rb.AddForce(direction * speed);
-		}
 		else
 			rb.velocity *= Mathf.Clamp01(1f - friction * Time.fixedDeltaTime);
 	}
